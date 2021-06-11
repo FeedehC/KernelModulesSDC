@@ -1,4 +1,4 @@
-obj-m +=  mimodulo.o drv1.o #drv2.o
+obj-m +=  gpiomod_output.o #mimodulo.o drv1.o #drv2.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
