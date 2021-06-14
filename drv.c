@@ -17,7 +17,7 @@ static struct gpio leds[] = {
 static struct hrtimer hr_timer;
 static int led1_value = 0; //Valor del LED1
 static int timer_count = 0; //Contador que va de 0 a 2
-static int timer_interval = 2; //2 segundos de parpadeo
+static int timer_interval = 3; //2 segundos de parpadeo
 
 /* Define GPIOs for BUTTONS */
 static struct gpio buttons[] = {
@@ -36,15 +36,15 @@ static irqreturn_t button_isr(int irq, void *data)
     switch (timer_count)
     {
     case 0:
-        timer_interval = 2;
+        timer_interval = 3;
         timer_count++;
         break;    
     case 1:
-        timer_interval = 1;
+        timer_interval = 2;
         timer_count++;
         break;
     case 2:
-        timer_interval = 0.5;
+        timer_interval = 1;
         timer_count = 0;
         break;
     
