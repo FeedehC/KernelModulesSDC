@@ -16,6 +16,8 @@ static struct gpio leds[] = {
 //Estructura para usar el timer
 static struct hrtimer hr_timer;
 static int led1_value = 0; //Valor del LED1
+static int timer_count = 0; //Contador que va de 0 a 2
+static int timer_interval = 2; //2 segundos de parpadeo
 
 /* Define GPIOs for BUTTONS */
 static struct gpio buttons[] = {
@@ -31,6 +33,27 @@ static int button_irqs[] = { -1, -1 };
  */
 static irqreturn_t button_isr(int irq, void *data)
 {
+    switch (timer_count)
+    {
+    case 0:
+        timer_interval = 2;
+        timer_count++;
+        break;    
+    case 1:
+        timer_interval = 1;
+        timer_count++;
+        break;
+    case 2:
+        timer_interval = 0.5;
+        timer_count = 0;
+        break;
+    
+    default:
+        //error
+        break;
+    }
+
+    /*
 	if(irq == button_irqs[0]){// && !gpio_get_value(leds[0].gpio)) {
 		if(gpio_get_value(leds[0].gpio) == 1){			
 			gpio_set_value(leds[0].gpio, 0);
@@ -41,7 +64,7 @@ static irqreturn_t button_isr(int irq, void *data)
 	}
 	else if(irq == button_irqs[1] && gpio_get_value(leds[0].gpio)) {
 			gpio_set_value(leds[0].gpio, 0);
-	}
+	}*/
 
 	return IRQ_HANDLED;
 }
@@ -55,7 +78,7 @@ enum hrtimer_restart timer_callback(struct hrtimer *timer_for_restart)
 	ktime_t interval;
 
   	currtime  = ktime_get();
-  	interval = ktime_set(1, 0); //1 second, 0 nanoseconds
+  	interval = ktime_set(timer_interval, 0);
 
   	hrtimer_forward(timer_for_restart, currtime, interval);
 
@@ -131,7 +154,7 @@ static int __init gpiomode_init(void)
 	}
 
     /* init timer, add timer function */
-	interval = ktime_set(1, 0); //1 second, 0 nanoseconds
+	interval = ktime_set(timer_interval, 0); //1 second, 0 nanoseconds
 	hrtimer_init(&hr_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
 	hr_timer.function = &timer_callback;
 	hrtimer_start(&hr_timer, interval, HRTIMER_MODE_REL);
