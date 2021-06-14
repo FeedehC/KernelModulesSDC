@@ -1,29 +1,21 @@
-/*
- * Basic Linux Kernel module using GPIO interrupts.
- *
- * Author:
- * 	Stefan Wendler (devnull@kaltpost.de)
- *
- * This software is licensed under the terms of the GNU General Public
- * License version 2, as published by the Free Software Foundation, and
- * may be copied, distributed, and modified under those terms.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- */
-
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/gpio.h>
 #include <linux/interrupt.h>
+#include <linux/timer.h>
+#include <linux/hrtimer.h>
+#include <linux/init.h>
+
+#define LED1	15
 
 /* Define GPIOs for LEDs */
 static struct gpio leds[] = {
 		{  15, GPIOF_OUT_INIT_LOW, "LED 1" },
 };
+
+//Estructura para usar el timer
+static struct hrtimer hr_timer;
+static int led1_value = 0; //Valor del LED1
 
 /* Define GPIOs for BUTTONS */
 static struct gpio buttons[] = {
@@ -55,11 +47,31 @@ static irqreturn_t button_isr(int irq, void *data)
 }
 
 /*
+ * Timer function called periodically
+ */
+enum hrtimer_restart timer_callback(struct hrtimer *timer_for_restart)
+{
+  	ktime_t currtime;
+	ktime_t interval;
+
+  	currtime  = ktime_get();
+  	interval = ktime_set(1, 0); //1 second, 0 nanoseconds
+
+  	hrtimer_forward(timer_for_restart, currtime, interval);
+
+	gpio_set_value(LED1, led1_value);
+	led1_value = !led1_value;
+
+	return HRTIMER_RESTART;
+}
+
+/*
  * Module init function
  */
 static int __init gpiomode_init(void)
 {
 	int ret = 0;
+    ktime_t interval;
 
 	printk(KERN_INFO "%s\n", __func__);
 
@@ -118,6 +130,12 @@ static int __init gpiomode_init(void)
 		goto fail3;
 	}
 
+    /* init timer, add timer function */
+	interval = ktime_set(1, 0); //1 second, 0 nanoseconds
+	hrtimer_init(&hr_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+	hr_timer.function = &timer_callback;
+	hrtimer_start(&hr_timer, interval, HRTIMER_MODE_REL);
+
 	return 0;
 
 // cleanup what has been setup so far
@@ -139,6 +157,7 @@ fail1:
 static void __exit gpiomode_exit(void)
 {
 	int i;
+    int ret = 0;
 
 	printk(KERN_INFO "%s\n", __func__);
 
@@ -146,10 +165,16 @@ static void __exit gpiomode_exit(void)
 	free_irq(button_irqs[0], NULL);
 	free_irq(button_irqs[1], NULL);
 
+    // check errors in hrtimer
+    ret = hrtimer_cancel(&hr_timer);
+	if(ret) {
+		printk("Failed to cancel tiemr.\n");
+	}
+
 	// turn all LEDs off
 	for(i = 0; i < ARRAY_SIZE(leds); i++) {
 		gpio_set_value(leds[i].gpio, 0);
-	}
+	}    
 
 	// unregister
 	gpio_free_array(leds, ARRAY_SIZE(leds));
@@ -157,8 +182,8 @@ static void __exit gpiomode_exit(void)
 }
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Stefan Wendler");
-MODULE_DESCRIPTION("Basic Linux Kernel module using GPIO interrupts");
+MODULE_AUTHOR("Maca y Fede");
+MODULE_DESCRIPTION("Modulo de Kernel para parpadear un LED y otras cositas");
 
 module_init(gpiomode_init);
 module_exit(gpiomode_exit);
