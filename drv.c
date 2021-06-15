@@ -94,9 +94,15 @@ static ssize_t my_write(struct file *f, const char __user *buf, size_t len, loff
     {
         pr_info("Error while writing data\n");
         return len;
-    }
+    }   
 
-	kstrtol(kernelRead, 10, led1_value);
+	
+	//if(kstrtol(kernelRead, 10, led1_value) != 0)
+	if(sprintf(kernelRead, "%d", led1_value) != 0)
+	{
+		pr_info("Error al escribir el valor de LED1.\n");
+		goto fail;
+    }
 
 	/*
     if ( kernelRead[0] == 'p' ){
