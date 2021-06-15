@@ -6,5 +6,5 @@ all:
 
 clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
-	rm *.csv *.o
+	rm *.csv *.o read_data
 
