@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
     while(1){
         fd = open("/dev/alarma", O_RDWR);
         fpt = fopen("data.csv", "a+"); //Se crea el archivo y se setea para escribir los datos
-        printf("fd=%d /// fpt=%d\n", fd, fpt);
+        printf("fd = %d /// fpt = %d /// errno = %d\n", fd, fpt, errno);
         if(fd < 0 || fpt < 0){
             printf("Error al abrir el archivo\n");
             exit(EXIT_FAILURE);
