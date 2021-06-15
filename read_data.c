@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define buf_size 256
+#define buf_size 128
 
 char buffer[buf_size];
 

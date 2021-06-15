@@ -13,7 +13,7 @@
 #include <linux/cdev.h>
 
 #define LED1	15
-#define buf_size 256
+#define buf_size 128
 
 /* Define GPIOs for LEDs */
 static struct gpio leds[] = {
@@ -130,8 +130,8 @@ enum hrtimer_restart timer_callback(struct hrtimer *timer_for_restart)
 
 	gpio_set_value(LED1, led1_value);
 
-	memset(kernel_buffer, '\0', buf_size);
-    sprintf(kernel_buffer, "%d", led1_value);
+	//memset(kernel_buffer, '\0', buf_size);
+    //sprintf(kernel_buffer, "%d", led1_value);
     //pr_info("%s\n", kernel_buffer);
 
 	led1_value = !led1_value;
