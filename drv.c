@@ -45,6 +45,18 @@ static struct class *class_dev; 	// Global variable for the device class
 /* Later on, the assigned IRQ numbers for the buttons are stored here */
 static int button_irqs[] = { -1, -1 };
 
+/////////////////////////////////////
+static int __init mod_init(void);
+static void __exit mod_exit(void);
+
+static int my_open(struct inode *i, struct file *f);
+static int my_close(struct inode *i, struct file *f);
+static ssize_t my_read(struct file *f, char __user *buf, size_t len, loff_t *off);
+static ssize_t my_write(struct file *f, const char __user *buf, size_t len, loff_t *off);
+static irqreturn_t button_isr(int irq, void *data);
+enum hrtimer_restart timer_callback(struct hrtimer *timer_for_restart);
+/////////////////////////////////////
+
 static int my_open(struct inode *i, struct file *f)
 {
     printk(KERN_INFO "alarma: open()\n");
@@ -83,6 +95,8 @@ static ssize_t my_write(struct file *f, const char __user *buf, size_t len, loff
         pr_info("Error while writing data\n");
         return len;
     }
+
+	kstrtol(kernelRead, 10, led1_value);
 
 	/*
     if ( kernelRead[0] == 'p' ){
