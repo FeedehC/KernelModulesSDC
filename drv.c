@@ -235,12 +235,12 @@ static int __init mod_init(void)
     //////////////////////////////////////////////////
 
 	//Aloco memoria para el String kernel_buffer
-    if ((kernel_buffer = kmalloc(mem_size, GFP_KERNEL)) == 0)
+    if ((kernel_buffer = kmalloc(buf_size, GFP_KERNEL)) == 0)
     {
         pr_info(KERN_INFO "Cannot allocate the memory to the kernel\n");
         return -1;
     }
-    if ((kernelRead = kmalloc(mem_size, GFP_KERNEL)) == 0)
+    if ((kernelRead = kmalloc(buf_size, GFP_KERNEL)) == 0)
     {
         pr_info(KERN_INFO "Cannot allocate the memory to the kernel\n");
         return -1;
