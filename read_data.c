@@ -32,7 +32,7 @@ int main(int argc, char const *argv[])
         fprintf(fpt,"%d,%s\n", counta, buffer);
         close(fd);
         fclose(fpt);
-        sleep(1);
+        usleep(500000); //500ms
         counta++;
     }
     return 0;
