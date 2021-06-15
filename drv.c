@@ -28,6 +28,8 @@ static int timer_interval = 3; //segundos de parpadeo
 
 //Buffer para la transmision de datos
 uint8_t *kernel_buffer;
+//Buffer para lectura de datos
+uint8_t *kernelRead;
 
 /* Define GPIOs for BUTTONS */
 static struct gpio buttons[] = {
@@ -53,14 +55,64 @@ static int my_close(struct inode *i, struct file *f)
     printk(KERN_INFO "alarma: close()\n");
     return 0;
 }
+
+/*
+** Esta funcion sera llamada cuando se lee el fichero de dispositivo
+*/
 static ssize_t my_read(struct file *f, char __user *buf, size_t len, loff_t *off)
 {
     printk(KERN_INFO "alarma: read()\n");
+	if (copy_to_user(buf, kernel_buffer, buf_size) > 0)
+    {
+        pr_info("Error while reading data\n");
+        return -1;
+    }
+    pr_info("Data is being read\n");
     return 0;
 }
+
+/*
+** Esta funcion sera llamada cuando se escribe en el fichero de dispositivo
+*/
 static ssize_t my_write(struct file *f, const char __user *buf, size_t len, loff_t *off)
 {
     printk(KERN_INFO "alarma: write()\n");
+	memset(kernelRead, '\0', buf_size);
+    if (copy_from_user(kernelRead, buf, len) > 0)
+    {
+        pr_info("Error while writing data\n");
+        return len;
+    }
+
+	/*
+    if ( kernelRead[0] == 'p' ){
+         polaridad *= -1;
+         pr_info("Data is being written, %d\n", polaridad);
+    }
+    else if( kernelRead[0] == 'u' ){ //020
+        kernelRead[0] = '0';
+        pr_info("%s\n", kernelRead);
+        if(kstrtol(kernelRead, 10, &escalaboton1) != 0)
+        {
+            pr_info("Failed converting Btn1 scale, exiting.\n");
+            goto fail;
+        }
+        pr_info("Escala boton 1 cambiada a %ld\n", escalaboton1);
+    }
+    else if( kernelRead[0] == 'd' ){
+        kernelRead[0] = '0';
+        pr_info("%s\n", kernelRead);
+        if(kstrtol(kernelRead, 10, &escalaboton2) != 0)
+        {
+            pr_info("Failed converting Btn2 scale, exiting.\n");
+            goto fail;
+        }
+        pr_info("Escala boton 2 cambiada a %ld\n", escalaboton2);
+    }*/
+
+    return len;
+fail:
+    memset(kernelRead, '\0', buf_size);
     return len;
 }
 
@@ -181,6 +233,20 @@ static int __init mod_init(void)
     }
     
     //////////////////////////////////////////////////
+
+	//Aloco memoria para el String kernel_buffer
+    if ((kernel_buffer = kmalloc(mem_size, GFP_KERNEL)) == 0)
+    {
+        pr_info(KERN_INFO "Cannot allocate the memory to the kernel\n");
+        return -1;
+    }
+    if ((kernelRead = kmalloc(mem_size, GFP_KERNEL)) == 0)
+    {
+        pr_info(KERN_INFO "Cannot allocate the memory to the kernel\n");
+        return -1;
+    }
+
+	/////////////////////////////////////////////////
     
 	printk(KERN_INFO "%s\n", __func__);
 
@@ -272,7 +338,11 @@ static void __exit mod_exit(void)
 	int i;
     int ret = 0;
 
-	printk(KERN_INFO "%s\n", __func__);    
+	printk(KERN_INFO "%s\n", __func__);  
+
+	//Se libera la memoria del Kernel
+    kfree(kernel_buffer); 
+    kfree(kernelRead); 
 
 	// free irqs
 	free_irq(button_irqs[0], NULL);
@@ -281,7 +351,7 @@ static void __exit mod_exit(void)
     // check errors in hrtimer
     ret = hrtimer_cancel(&hr_timer);
 	if(ret) {
-		printk("Failed to cancel tiemr.\n");
+		printk("Failed to cancel timer.\n");
 	}
 
 	// turn all LEDs off
