@@ -13,6 +13,7 @@
 #include <linux/cdev.h>
 
 #define LED1	15
+#define buf_size 256
 
 /* Define GPIOs for LEDs */
 static struct gpio leds[] = {
@@ -23,7 +24,10 @@ static struct gpio leds[] = {
 static struct hrtimer hr_timer;
 static int led1_value = 0; //Valor del LED1
 static int timer_count = 0; //Contador que va de 0 a 2
-static int timer_interval = 3; //2 segundos de parpadeo
+static int timer_interval = 3; //segundos de parpadeo
+
+//Buffer para la transmision de datos
+uint8_t *kernel_buffer;
 
 /* Define GPIOs for BUTTONS */
 static struct gpio buttons[] = {
@@ -62,7 +66,7 @@ static ssize_t my_write(struct file *f, const char __user *buf, size_t len, loff
 
 static struct file_operations fops =
 {
-    // Dentro de file_operations defino las funciones que voy a implementar..!!
+    //Se definen las funciones de entrada/salida
     .owner = THIS_MODULE,
     .open = my_open,
     .release = my_close,
@@ -125,6 +129,11 @@ enum hrtimer_restart timer_callback(struct hrtimer *timer_for_restart)
   	hrtimer_forward(timer_for_restart, currtime, interval);
 
 	gpio_set_value(LED1, led1_value);
+
+	memset(kernel_buffer, '\0', buf_size);
+    sprintf(kernel_buffer, "%d", led1_value);
+    //pr_info("%s\n", kernel_buffer);
+
 	led1_value = !led1_value;
 
 	return HRTIMER_RESTART;
