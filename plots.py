@@ -12,12 +12,12 @@ y = axises[:,1]
 
 fig = plt.figure()
 ax = plt.subplot(1, 1, 1)
-data_skip = 50
+data_skip = 10
 
 def init_func():
     ax.clear()
     plt.style.use('fivethirtyeight')
-    fig = plt.figure(figsize = [20,15])
+    fig = plt.figure()
     plt.plot(y, color="magenta")
     plt.title("Alarma")
     plt.xlabel("Tiempo")
@@ -32,7 +32,7 @@ anim = FuncAnimation(fig,
                      update_plot,
                      frames=np.arange(0, len(x), data_skip),
                      init_func=init_func,
-                     interval=20)
+                     interval=10)
 
 plt.show()
 
