@@ -55,9 +55,6 @@ static int my_close(struct inode *i, struct file *f){
     return 0;
 }
 
-/*
-** Esta funcion sera llamada cuando se lee el fichero de dispositivo
-*/
 static ssize_t my_read(struct file *f, char __user *buf, size_t len, loff_t *off){
     printk(KERN_INFO "alarma: read()\n");
 	if (copy_to_user(buf, kernel_buffer, buf_size) > 0){
@@ -68,9 +65,6 @@ static ssize_t my_read(struct file *f, char __user *buf, size_t len, loff_t *off
     return 0;
 }
 
-/*
-** Esta funcion sera llamada cuando se escribe en el fichero de dispositivo
-*/
 static ssize_t my_write(struct file *f, const char __user *buf, size_t len, loff_t *off){
     printk(KERN_INFO "alarma: write()\n");
 	memset(kernelRead, '\0', buf_size);         //carga el buffer kernelRead con todos ceros
@@ -78,12 +72,10 @@ static ssize_t my_write(struct file *f, const char __user *buf, size_t len, loff
         pr_info("Error while writing data\n");
         return len;
     }   
-
 	if(sprintf(kernelRead, "%d", led1_value) != 0){
 		pr_info("Error al escribir el valor de LED1.\n");
 		goto fail;
     }
-
     return len;
 fail:
     memset(kernelRead, '\0', buf_size);         // vuelve el buffer a cero y retorna
