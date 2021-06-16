@@ -12,7 +12,7 @@ plt.style.use('fivethirtyeight')
 
 data_skip = 10
 
-def init_func():
+def init_func(i):
     #ax.clear()
     data_frame = pd.read_csv('data.csv')
     axises = data_frame.to_numpy(dtype = int)
