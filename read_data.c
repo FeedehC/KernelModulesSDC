@@ -6,7 +6,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include "drv.c"
 
 #define buf_size 128
 
@@ -21,7 +20,7 @@ int main(int argc, char const *argv[])
     while(1){
         fd = open("/dev/alarma", O_RDWR);
         fpt = fopen("data.csv", "a+"); //Se crea el archivo y se setea para escribir los datos
-        printf("fd = %d     fpt = %d    errno = %d      led_value=%d\n", fd, fpt, errno, led_value);
+        printf("fd = %d     fpt = %d    errno = %d ", fd, fpt, errno);
 
         if(fd < 0 || fpt < 0){
             printf("Error al abrir el archivo\n");
@@ -34,6 +33,7 @@ int main(int argc, char const *argv[])
         }
         //Formateo el string y lo envio al archivo fpt
         fprintf(fpt,"%d,%s\n", counta, buffer);
+        printf("led_value=%s\n", buffer);
         close(fd);
         fclose(fpt);
         usleep(500000); //500ms
