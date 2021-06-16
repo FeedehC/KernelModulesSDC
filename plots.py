@@ -8,7 +8,7 @@ import pandas as pd
 #print(data_frame)
 
 fig = plt.figure(figsize = [30,20])
-ax = plt.subplot(1, 1, 1)
+
 data_skip = 10
 
 def init_func():
@@ -17,6 +17,7 @@ def init_func():
     axises = data_frame.to_numpy(dtype = int)
     x = axises[:,0]
     y = axises[:,1]
+    plt.subplot(1, 1, 1)
     plt.style.use('fivethirtyeight')
     plt.plot(y, color="magenta")
     plt.title("Alarma")
@@ -24,9 +25,9 @@ def init_func():
     plt.ylabel("LED1")
     #plt.show()
 
-def update_plot(i):
-    ax.plot(x[i:i+data_skip], y[i:i+data_skip], color='magenta')
-    ax.scatter(x[i], y[i])
+# def update_plot(i):
+#     ax.plot(x[i:i+data_skip], y[i:i+data_skip], color='magenta')
+#     ax.scatter(x[i], y[i])
 
 anim = FuncAnimation(fig, init_func, interval=500)
 #anim = FuncAnimation(fig, update_plot,frames=np.arange(0, len(x), data_skip),init_func=init_func,interval=1000)

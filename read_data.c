@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
 {
     int fd = 0;
     FILE *fpt;
-    int counta = 0;
+    int x = 0;
 
     while(1){
         fd = open("/dev/alarma", O_RDWR);
@@ -32,12 +32,12 @@ int main(int argc, char const *argv[])
             exit(EXIT_FAILURE);
         }
         //Formateo el string y lo envio al archivo fpt
-        fprintf(fpt,"%d,%s\n", counta, buffer);
-        printf("led_value=%s\n", buffer);
+        fprintf(fpt,"%d,%s\n", x, buffer);
+        printf("x=%d    led_value=%s\n", x, buffer);
         close(fd);
         fclose(fpt);
         usleep(500000); //500ms
-        counta++;
+        x++;
     }
     return 0;
 }
